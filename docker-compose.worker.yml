@@ -1,0 +1,16 @@
+# Worker node
+# Run on 4 separate machines
+# Set FAKTORY_SERVER_IP to your central server's IP address
+services:
+  worker-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    environment:
+      - FAKTORY_URL=tcp://${FAKTORY_SERVER_IP:-localhost}:7419
+      - RUST_LOG=warn
+    stop_grace_period: 35s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"

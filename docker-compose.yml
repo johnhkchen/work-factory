@@ -1,0 +1,74 @@
+services:
+  faktory:
+    image: contribsys/faktory:latest
+    ports:
+      - "7419:7419" # Expose for remote worker connections
+      - "7420:7420" # Web UI
+    environment:
+      - FAKTORY_PASSWORD=
+    volumes:
+      - faktory-data:/var/lib/faktory
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 7419 || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0" # Efficient for distributed setup
+
+  api-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "3000:3000" # Expose API directly
+    environment:
+      - FAKTORY_URL=tcp://faktory:7419
+      - BIND_ADDR=0.0.0.0:3000
+      - RUST_LOG=warn
+    depends_on:
+      faktory:
+        condition: service_healthy
+
+  worker-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    environment:
+      - FAKTORY_URL=tcp://faktory:7419
+      - RUST_LOG=warn
+    depends_on:
+      faktory:
+        condition: service_healthy
+    stop_grace_period: 35s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0" # Efficient single worker
+
+  frontend-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    environment:
+      - API_SERVICE_URL=http://api-service:3000
+      - BIND_ADDR=0.0.0.0:8000
+      - RUST_LOG=warn
+    depends_on:
+      - api-service
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - frontend-service
+      - faktory
+
+volumes:
+  faktory-data:

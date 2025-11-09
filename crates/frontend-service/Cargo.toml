@@ -1,0 +1,25 @@
+[package]
+name = "frontend-service"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+anyhow.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+
+# Web framework
+axum = "0.8.6"
+
+# Templating
+askama = "0.14.0"
+
+# HTTP client for calling API service
+reqwest = { version = "0.12.24", features = ["json"] }
+
+# Tower for middleware
+tower = "0.5.2"
+tower-http = { version = "0.6.6", features = ["fs", "trace"] }

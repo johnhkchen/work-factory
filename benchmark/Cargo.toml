@@ -1,0 +1,28 @@
+[package]
+name = "benchmark"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+tokio = { version = "1.42", features = ["full"] }
+reqwest = { version = "0.12.24", features = ["json"] }
+serde_json = "1.0"
+anyhow = "1.0"
+
+[[bin]]
+name = "benchmark"
+path = "src/main.rs"
+
+[[bin]]
+name = "sustained"
+path = "src/sustained.rs"
+
+[[bin]]
+name = "large"
+path = "src/large.rs"
+
+[[bin]]
+name = "scaling"
+path = "src/scaling.rs"

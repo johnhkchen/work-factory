@@ -1,0 +1,23 @@
+FROM rust:latest AS builder
+
+WORKDIR /app
+
+# Copy workspace files
+COPY Cargo.toml Cargo.lock ./
+COPY crates ./crates
+
+# Build the frontend-service
+RUN cargo build --release --bin frontend-service
+
+# Runtime image
+FROM debian:bookworm-slim
+
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /app/target/release/frontend-service /usr/local/bin/frontend-service
+
+EXPOSE 8000
+
+CMD ["frontend-service"]

@@ -1,0 +1,21 @@
+FROM rust:latest AS builder
+
+WORKDIR /app
+
+# Copy workspace files
+COPY Cargo.toml Cargo.lock ./
+COPY crates ./crates
+
+# Build the worker-service
+RUN cargo build --release --bin worker-service
+
+# Runtime image
+FROM debian:bookworm-slim
+
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /app/target/release/worker-service /usr/local/bin/worker-service
+
+CMD ["worker-service"]
