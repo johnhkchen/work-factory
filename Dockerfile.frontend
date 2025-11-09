@@ -2,12 +2,32 @@ FROM rust:latest AS builder
 
 WORKDIR /app
 
-# Copy workspace files
+# Copy workspace manifest files first for better layer caching
 COPY Cargo.toml Cargo.lock ./
+COPY crates/job-types/Cargo.toml ./crates/job-types/Cargo.toml
+COPY crates/api-service/Cargo.toml ./crates/api-service/Cargo.toml
+COPY crates/worker-service/Cargo.toml ./crates/worker-service/Cargo.toml
+COPY crates/frontend-service/Cargo.toml ./crates/frontend-service/Cargo.toml
+
+# Create dummy source files to cache dependencies
+RUN mkdir -p crates/job-types/src && \
+    mkdir -p crates/api-service/src && \
+    mkdir -p crates/worker-service/src && \
+    mkdir -p crates/frontend-service/src && \
+    echo "fn main() {}" > crates/api-service/src/main.rs && \
+    echo "fn main() {}" > crates/worker-service/src/main.rs && \
+    echo "fn main() {}" > crates/frontend-service/src/main.rs && \
+    echo "pub fn dummy() {}" > crates/job-types/src/lib.rs
+
+# Build dependencies only (will be cached)
+RUN cargo build --release --bin frontend-service
+
+# Now copy actual source code
 COPY crates ./crates
 
-# Build the frontend-service
-RUN cargo build --release --bin frontend-service
+# Build the frontend-service with real code (dependencies already cached)
+RUN touch crates/*/src/*.rs crates/*/src/**/*.rs 2>/dev/null || true && \
+    cargo build --release --bin frontend-service
 
 # Runtime image
 FROM debian:bookworm-slim

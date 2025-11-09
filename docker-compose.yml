@@ -29,6 +29,10 @@ services:
       - FAKTORY_URL=tcp://faktory:7419
       - BIND_ADDR=0.0.0.0:3000
       - RUST_LOG=warn
+      # Batching configuration for optimal performance
+      - BATCH_MAX_SIZE=100 # Jobs per batch (higher = better network efficiency)
+      - BATCH_MAX_DELAY_MS=50 # Max wait time in ms (lower = lower latency)
+      - BATCH_AUTO_ENABLED=true # Auto-batch individual job requests
     depends_on:
       faktory:
         condition: service_healthy
