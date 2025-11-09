@@ -4,17 +4,38 @@ A high-performance distributed job processing system built with Rust, Faktory, a
 
 ## 🚀 Quick Start
 
+### Using Just (Recommended)
+
 ```bash
-# Clone and start all services
+# Server node
 git clone <your-repo>
 cd work-factory
+just server
+
+# Worker node (on another machine)
+FAKTORY_SERVER_IP=192.168.1.100 just worker
+
+# Test it
+just test-batch
+```
+
+### Using Docker Compose
+
+```bash
+# All-in-one
 docker-compose up -d
 
-# Access the system
-# - Frontend: http://localhost
-# - API: http://localhost:3000
-# - Faktory UI: http://localhost:7420
+# Distributed
+docker-compose -f docker-compose.server.yml up -d  # Server
+FAKTORY_SERVER_IP=<ip> docker-compose -f docker-compose.worker.yml up -d  # Worker
 ```
+
+**Access:**
+- Frontend: http://localhost
+- API: http://localhost:3000
+- Faktory UI: http://localhost:7420
+
+👉 See [QUICK_START.md](QUICK_START.md) for detailed setup instructions
 
 ## 🎯 Key Features
 
