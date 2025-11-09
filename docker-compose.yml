@@ -45,7 +45,7 @@ services:
       - FAKTORY_URL=tcp://faktory:7419
       - RUST_LOG=warn
       # Lower concurrency for local worker (no network latency to hide)
-      - WORKER_CONCURRENCY=50
+      - WORKER_CONCURRENCY=${WORKER_CONCURRENCY:-50}
     depends_on:
       faktory:
         condition: service_healthy
@@ -53,7 +53,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "1.0" # Efficient single worker
+          cpus: "${WORKER_CPUS:-4.0}" # Configurable CPU limit
 
   frontend-service:
     build:

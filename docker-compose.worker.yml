@@ -9,11 +9,12 @@ services:
     environment:
       - FAKTORY_URL=tcp://${FAKTORY_SERVER_IP:-localhost}:7419
       - RUST_LOG=warn
-      # High concurrency to hide network fetch latency on remote workers
-      # With 50ms network latency, need many concurrent slots to maintain throughput
-      - WORKER_CONCURRENCY=500
+      # Very high concurrency to hide network fetch latency on remote workers
+      # With 50ms network latency, need massive parallelism to saturate CPU
+      # Increase this value until CPU maxes out or performance stops improving
+      - WORKER_CONCURRENCY=${WORKER_CONCURRENCY:-2000}
     stop_grace_period: 35s
     deploy:
       resources:
         limits:
-          cpus: "1.0"
+          cpus: "${WORKER_CPUS:-4.0}" # Configurable CPU limit, default 4 cores

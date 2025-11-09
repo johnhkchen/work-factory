@@ -19,7 +19,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "2.0"
+          cpus: "8.0" # Increased for high-throughput distributed workloads
 
   api-service:
     build:

@@ -27,13 +27,15 @@ server:
     @echo "   Set FAKTORY_SERVER_IP to this machine's IP address"
 
 # Start worker node (set FAKTORY_SERVER_IP first)
-worker:
+worker concurrency="2000" cpus="4.0":
     #!/usr/bin/env bash
     if [ -z "$FAKTORY_SERVER_IP" ]; then
         echo "❌ Error: Set FAKTORY_SERVER_IP environment variable"
         echo ""
         echo "Usage:"
         echo "  FAKTORY_SERVER_IP=192.168.1.100 just worker"
+        echo "  FAKTORY_SERVER_IP=192.168.1.100 just worker 3000     # Custom concurrency"
+        echo "  FAKTORY_SERVER_IP=192.168.1.100 just worker 3000 8.0 # Custom concurrency + CPUs"
         echo ""
         echo "To find your server IP:"
         echo "  hostname -I | awk '{print \$1}'"
@@ -41,16 +43,25 @@ worker:
     fi
     echo "🔧 Starting worker node..."
     echo ""
+    export WORKER_CONCURRENCY={{concurrency}}
+    export WORKER_CPUS={{cpus}}
     docker compose -f docker-compose.worker.yml up -d --build
     echo ""
     echo "✅ Worker started and connected to $FAKTORY_SERVER_IP"
     echo ""
     echo "⚙️  Worker config:"
-    echo "  WORKER_CONCURRENCY=500 (optimized for network latency)"
+    echo "  WORKER_CONCURRENCY={{concurrency}}"
+    echo "  WORKER_CPUS={{cpus}}"
+    echo ""
+    echo "💡 Tuning tips:"
+    echo "  - Increase concurrency until CPU maxes out"
+    echo "  - Try: just worker 3000, just worker 4000, etc."
+    echo "  - Set CPU limit to match your hardware"
+    echo "  - Example: just worker 5000 8.0  # 5k concurrency, 8 cores"
     echo ""
     echo "📊 Monitor worker:"
     echo "  just worker-logs"
-    echo "  just worker-stats"
+    echo "  docker stats  # Watch CPU usage"
 
 # Start local development (all services on one machine)
 dev:
