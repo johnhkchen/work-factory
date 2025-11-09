@@ -307,6 +307,23 @@ Edit `crates/worker-service/src/main.rs`:
 
 ## Quick Reference
 
+### Just Commands
+
+```bash
+just server          # Start server node
+just worker          # Start worker node (set FAKTORY_SERVER_IP)
+just dev             # Start all services locally
+just status          # Show service status
+just test-batch      # Test batching system
+just perf-test       # Quick performance test
+just stress-test     # Stress test (10k jobs)
+just worker-logs     # Monitor worker logs
+just server-logs     # Monitor server logs
+just down            # Stop all services
+just clean           # Stop and remove everything
+just --list          # Show all commands
+```
+
 ### Endpoints
 - `GET /health` - Health check
 - `POST /jobs/add` - Add two numbers
@@ -323,11 +340,17 @@ Edit `crates/worker-service/src/main.rs`:
 - `80` - Nginx (production)
 
 ### Environment Variables
+
+**API Service:**
 - `FAKTORY_URL` - Faktory server URL (default: tcp://localhost:7419)
 - `BIND_ADDR` - API bind address (default: 0.0.0.0:3000)
 - `BATCH_MAX_SIZE` - Jobs per batch (default: 100)
 - `BATCH_MAX_DELAY_MS` - Max wait time (default: 50ms)
 - `BATCH_AUTO_ENABLED` - Enable auto-batching (default: true)
+
+**Worker Service:**
+- `FAKTORY_URL` - Faktory server URL (required for remote workers)
+- `WORKER_CONCURRENCY` - Concurrent job slots (default: 500 for LAN, 50 for local)
 
 ---
 
