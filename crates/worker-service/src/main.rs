@@ -114,10 +114,16 @@ async fn main() -> anyhow::Result<()> {
         shutdown_clone.notify_one();
     });
 
+    // Get worker concurrency from environment or use high default for network efficiency
+    let worker_concurrency = std::env::var("WORKER_CONCURRENCY")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(500); // High concurrency to hide network latency
+
     // Build worker and register handlers with balanced concurrency
     let mut worker = WorkerBuilder::default()
         .hostname("worker-service".to_string())
-        .workers(50) // Balanced: 30 concurrent jobs per worker (matches 3-core Faktory capacity)
+        .workers(worker_concurrency) // High concurrency masks network fetch latency
         .register_fn("math_add", job_handler)
         .register_fn("math_subtract", job_handler)
         .register_fn("math_multiply", job_handler)
@@ -126,7 +132,7 @@ async fn main() -> anyhow::Result<()> {
         .await?;
 
     info!("Worker connected and ready to process jobs");
-    info!("Concurrency: 30 jobs per worker");
+    info!("Concurrency: {} jobs per worker", worker_concurrency);
     info!("Registered handlers: math_add, math_subtract, math_multiply, math_divide");
 
     // Run worker with graceful shutdown support

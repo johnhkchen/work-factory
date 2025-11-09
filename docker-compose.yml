@@ -44,6 +44,8 @@ services:
     environment:
       - FAKTORY_URL=tcp://faktory:7419
       - RUST_LOG=warn
+      # Lower concurrency for local worker (no network latency to hide)
+      - WORKER_CONCURRENCY=50
     depends_on:
       faktory:
         condition: service_healthy

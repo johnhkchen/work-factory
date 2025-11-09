@@ -9,6 +9,9 @@ services:
     environment:
       - FAKTORY_URL=tcp://${FAKTORY_SERVER_IP:-localhost}:7419
       - RUST_LOG=warn
+      # High concurrency to hide network fetch latency on remote workers
+      # With 50ms network latency, need many concurrent slots to maintain throughput
+      - WORKER_CONCURRENCY=500
     stop_grace_period: 35s
     deploy:
       resources:
